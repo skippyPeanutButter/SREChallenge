@@ -10,20 +10,20 @@ which make up the webserver instances, security groups, ssh-keys and tie them
 all together.
 
 The elastic load balancer will act as a user facing endpoint. This endpoint
-will sit in front of the webserver instances and forward traffic to them using
+will sit in front of the web server instances and forward traffic to them using
 http and https. The load balancer is configured with a self-signed cert for
-encrypting traffic between the browser and the traffic between the elb and the
-instances are sent in plain text. The ELB periodically befores a health check
+encrypting traffic between the browser and the elb, the traffic between the elb
+and instances are sent in plain text. The ELB periodically performs a health check
 of all the instances its configured to forward traffic to, if any of them fail
-the check then they are removed from the ELB.
+the check 3 times consecutively then they are removed from the ELB.
 
-The autoscaling group is responsible for recreating webserver instances that
+The autoscaling group is responsible for recreating web server instances that
 are consistently failing the ELB health checks and adding them to the load
 balancer. It is also responsible spinning up additional instances when the
-CPU utilization passes 70% twice within 2 minutes via an autoscaling policy to
-handle increased loads.
+average CPU utilization for the cluster passes 70% twice within 2 minutes via
+an autoscaling policy to handle increased loads.
 
-The launch configuration make up the webserver instances. The launch
+The launch configuration make up the web server instances. The launch
 configuration executes a user-data script when a new EC2 instance is spun up.
 The user-data downloads and executes Ansible to install apache2 and copy over
 the necessary configuration files that enables apache to redirect any client
@@ -45,7 +45,7 @@ docs](https://aws.amazon.com/premiumsupport/knowledge-center/create-access-key/)
 
 > Not responsible for any of the charges you may incur while having fun :)
 
-Once this is done you'll need to specific the following environment variables.
+Once this is done you'll need to specify the following environment variables.
 This is what will allow terraform to communicate with AWS on your behalf and
 create the necessary infrastructure.
 
@@ -97,7 +97,7 @@ Once all of the above is good to go, execute `./provision.sh`
 1. Check to see if all of the necessary command-line tools are installed
 2. Generate a self-signed x509 server certificate and upload it to AWS IAM
 3. Retrieve the ARN of the uploaded cert and insert it in `elb.tf` as the ssl_certificate_id property
-4. Generate an ssh RSA keypair, the key pair will be added to the launch configuration
+4. Generate an ssh RSA keypair, the key pair will be used by the launch configuration
 5. terraform init/plan/apply the infrastructure (automatically with auto-approve)
 6. Retrieve the ELB dns name and run a health check against the DNS_NAME/test.html endpoint
 7. Alert you when the endpoint returns a 200 indicating that the service is up.
@@ -169,6 +169,8 @@ Again, options may differ based on your version of ssh-keygen
 ssh-keygen -t rsa -N "" -f $PWD/ec2-key
 ```
 
+The `ec2-key.pub` key should be used by the AWS launch configuration.
+
 4. Run Terraform
 
 Execute the following commands to spin up your terraform infrastructure.
@@ -186,11 +188,13 @@ Once it completes you should see terraform output the ELB DNS name.
 
 Due to the instances being provisioned via a user-data script, the provisioning
 will still be running even though all of the infrastructure is provisioned in
-AWS. This includes the apt package installation, the ansible playbook, and the
-goss tests.
+AWS. This includes the apt package installation, the ansible playbook execution,
+and the goss tests.
 
 You can execute this curl check against the ELB DNS NAME, once a 200 is returned
 you will know everything is finished provisioning.
+
+> Again flags may be different depending on your version of curl
 
 ```bash
 bash -c 'while [[ "$(curl -k -L -s -o /dev/null -w ''%{http_code}'' <ELB_DNS_NAME>/test.html)" != "200" ]]; do echo "waiting for provisioning"; sleep 5; done'
