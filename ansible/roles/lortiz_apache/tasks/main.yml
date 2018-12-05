@@ -1,0 +1,40 @@
+- name: Install Apache Http server
+  apt:
+    name: apache2
+    state: present
+    update_cache: yes
+
+- name: Start Apache enable it on bootup
+  service:
+    name: apache2
+    state: started
+    enabled: true
+
+- name: Enable apache2 rewrite module
+  apache2_module:
+    name: rewrite
+    state: present
+
+- name: Remove old files
+  file:
+    state: absent
+    path: "{{ item }}"
+  with_items:
+    - /var/www/html/index.html
+    - /etc/apache2/sites-enabled/000-default.conf
+
+- name: Copy files
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: 644
+    owner: root
+    group: root
+  with_items:
+    - { src: index.html, dest: /var/www/html/index.html }
+    - { src: 000-default.conf, dest: /etc/apache2/sites-enabled/000-default.conf }
+
+- name: Restart apache
+  service:
+    name: apache2
+    state: reloaded
