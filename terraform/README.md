@@ -199,3 +199,19 @@ you will know everything is finished provisioning.
 ```bash
 while [[ "$(curl -k -L -s -o /dev/null -w ''%{http_code}'' <ELB_DNS_NAME>/test.html)" != "200" ]]; do echo "waiting for provisioning"; sleep 5; done
 ```
+
+### Extra: Stress test
+
+If interested in testing the Autoscaling policy, the `stress` package for ubuntu
+can be used to max out the CPU for a specific period of time, it just needs to
+be long enough `> 120 seconds` to trigger the cloud watch alarm.
+
+SSH into the instance, become root and run:
+
+```bash
+apt-get install stress
+stress --cpu 1 --timeout 300
+```
+
+After about 2 minutes, a cloud watch alarm should trigger and a new instance
+should be provisioned and added to the ELB.
