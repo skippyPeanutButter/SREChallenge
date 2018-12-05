@@ -64,6 +64,15 @@ Install the following the tools:
 [AWS cli](https://docs.aws.amazon.com/cli/latest/userguide/installing.html)
 <br>Version: aws-cli/1.16.67 Python/2.7.15 Darwin/16.7.0 botocore/1.12.57
 
+This can be setup by configuring a python 2.7 virtual environment and installing
+aws-cli requirements from the root of the repo.
+
+```bash
+# from the root of the repo
+virtual venv && source venv/bin/activate
+pip install -r aws-cli-reqs.txt
+```
+
 [Terraform](https://releases.hashicorp.com/terraform/0.11.10/terraform_0.11.10_darwin_amd64.zip)
 <br>Version: 0.11.10
 
@@ -90,7 +99,8 @@ echo $AWS_ACCESS_KEY_ID
 echo $AWS_SECRET_ACCESS_KEY
 ```
 
-Once all of the above is good to go, execute `./provision.sh`
+Once all of the above is good to go, then from the `terraform` directory
+execute `./provision.sh`.
 
 `provision.sh` will do the following:
 
