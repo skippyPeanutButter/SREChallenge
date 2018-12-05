@@ -197,5 +197,5 @@ you will know everything is finished provisioning.
 > Again flags may be different depending on your version of curl
 
 ```bash
-bash -c 'while [[ "$(curl -k -L -s -o /dev/null -w ''%{http_code}'' <ELB_DNS_NAME>/test.html)" != "200" ]]; do echo "waiting for provisioning"; sleep 5; done'
+while [[ "$(curl -k -L -s -o /dev/null -w ''%{http_code}'' <ELB_DNS_NAME>/test.html)" != "200" ]]; do echo "waiting for provisioning"; sleep 5; done
 ```
